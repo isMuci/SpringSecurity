@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,16 +29,16 @@ public class SecurityConfig {
                 .formLogin(conf ->
                         conf.loginProcessingUrl("/login")
                                 .successHandler(new AuthenticationSuccessHandler() {
-                                @Override
-                                public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                                    response.setContentType("text/html;charset=UTF-8");
-                                    response.getWriter().write("loginOK");
+                                    @Override
+                                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                                        response.setContentType("text/html;charset=UTF-8");
+                                        response.getWriter().write("loginOK");
 
-                                    System.out.println("authentication.getAuthorities() =" + authentication.getCredentials());
-                                    System.out.println("authentication.getAuthorities() =" + authentication.getPrincipal());
-                                    System.out.println("authentication.getAuthorities() =" + authentication.getAuthorities());
+                                        System.out.println("authentication.getAuthorities() =" + authentication.getCredentials());
+                                        System.out.println("authentication.getAuthorities() =" + authentication.getPrincipal());
+                                        System.out.println("authentication.getAuthorities() =" + authentication.getAuthorities());
 
-                                }
+                                    }
                                 })
                                 .failureHandler(new AuthenticationFailureHandler() {
                                     @Override
