@@ -14,6 +14,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         response.setContentType("text/html;charset=UTF-8");
         response.getWriter().write("loginERR");
 
+        System.out.println("exception = "+exception);
+
         exception.printStackTrace();
     }
 }
