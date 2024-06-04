@@ -13,5 +13,8 @@ public class LoginAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         System.out.println("AccessDeniedException = "+accessDeniedException);
         accessDeniedException.printStackTrace();
+
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().write("异常："+accessDeniedException.getMessage());
     }
 }

@@ -35,6 +35,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         while ((line=br.readLine())!=null){
             sb.append(line);
         }
+        System.out.println(sb);
         return JSONUtil.parseObj(sb.toString()).toBean(User.class);
     }
 }

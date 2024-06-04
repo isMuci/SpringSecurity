@@ -27,7 +27,7 @@ public class VerificationCodeFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(!"/login".equals(request.getRequestURI())){
+        if(!("/login".equals(request.getRequestURI()) && request.getMethod().equals("POST"))){
             filterChain.doFilter(request,response);
         }else {
             try {
@@ -40,7 +40,7 @@ public class VerificationCodeFilter extends OncePerRequestFilter {
 
         }
     }
-//TODO MUCI 2024/6/3: p18
+
     private void verificationCode(HttpServletRequest request, HttpServletResponse response) throws VerificationCodeException {
         String requestCode = request.getParameter("kaptcha");
         HttpSession session = request.getSession();
