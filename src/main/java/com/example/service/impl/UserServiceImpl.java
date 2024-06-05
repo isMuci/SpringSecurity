@@ -6,43 +6,51 @@ import com.example.entity.Permission;
 import com.example.entity.User;
 import com.example.mapper.PermissionMapper;
 import com.example.mapper.UserMapper;
+import com.example.service.UserDetailService;
 import com.example.service.UserService;
+import com.example.utils.JWTUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
-    UserMapper userMapper;
+    private  AuthenticationManager authenticationManager;
 
-    @Autowired
-    PermissionMapper permissionMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        QueryWrapper<User> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("username",username);
-        User user=userMapper.selectOne(queryWrapper);
-
-        if(user==null){
-            throw new UsernameNotFoundException("用户名未找到");
+    public String login(User user) {
+        UsernamePasswordAuthenticationToken authentication =new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        Authentication authenticate  = null;
+        try{
+            authenticate = authenticationManager.authenticate(authentication);
         }
-        System.out.println("找到用户");
-        QueryWrapper<Permission> permissionQueryWrapper=new QueryWrapper<>();
-        permissionQueryWrapper.eq("user_id",user.getId());
-
-        List<Permission> permissions = permissionMapper.selectList(permissionQueryWrapper);
-
-        List<String> permissionTags = permissions.stream().map(Permission::getTag).collect(Collectors.toList());
-        user.setAuthorities(AuthorityUtils.createAuthorityList(permissionTags));
-        System.out.println(user.isEnabled());
-        return user;
+        catch (AuthenticationException e) {
+            log.error("用户名或密码错误！");
+            log.info("{}",e.getMessage());
+            System.out.println(e.getMessage());
+            // TODO 抛出一个业务异常
+            return "用户名或密码错误！";
+        }
+        // 获取返回的用户
+        User umsSysUser = (User) authenticate.getPrincipal();
+        // 生成一个token，返回给前端
+        String token = JWTUtil.token(authenticate, 7L);
+        log.info("登陆后的用户==========》{}",umsSysUser);
+        return token;
     }
 }

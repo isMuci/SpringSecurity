@@ -14,6 +14,7 @@ public class JWTAuthentication implements Authentication {
     private Collection<SimpleGrantedAuthority> authorities;
     @Setter
     private Object details;
+
     private boolean authenticated;
     @Setter
     private Object principal;

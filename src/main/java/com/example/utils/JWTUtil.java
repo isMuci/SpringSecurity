@@ -36,7 +36,14 @@ public class JWTUtil {
         String json = JWT.decode(token).getAudience().get(0);
 
         JWTAuthentication jwtAuthentication=JSON.parseObject(json,JWTAuthentication.class);
+
+        System.out.println(json);
+
         SecurityContextHolder.getContext().setAuthentication(jwtAuthentication);
+
+        Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
+
+        System.out.println(authentication.isAuthenticated());
 
     }
 }
