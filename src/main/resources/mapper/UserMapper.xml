@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.example.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="enabled" property="enabled"/>
+        <collection property="roles" resultMap="RoleResultMap"/>
+    </resultMap>
+
+    <resultMap id="RoleResultMap" type="com.example.entity.Role">
+        <id column="role_id" property="roleId"/>
+        <result column="role_label" property="roleLabel"/>
+        <result column="role_name" property="roleName"/>
+        <result column="sort" property="sort"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <!--  根据用户名查询用户和角色信息  -->
+    <select id="selectUserByUsername" resultMap="UserResultMap">
+        select
+        u.id,u.username,
+        u.password,
+        u.enabled,
+        r.role_id,
+        r.role_label,
+        r.role_name,
+        r.sort,
+        r.status,
+        r.deleted,
+        r.remark,
+        r.create_time,
+        r.update_time
+        from users u left join user_role ur on u.id = ur.user_id
+        left join role r on ur.role_id = r.role_id
+        where u.enabled = 1 and r.deleted = 0 and u.username = #{username}
+    </select>
+</mapper>

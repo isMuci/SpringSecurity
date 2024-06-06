@@ -22,9 +22,9 @@ public class LoginController {
 
     @PostMapping("/login")
     @ResponseBody
-    public String login(@RequestBody User user){
+    public String login(@RequestParam("username")String username,@RequestParam("password")String password){
         System.out.println("登录中");
-        String token = userService.login(user);
+        String token = userService.login(new User(username,password));
 
         return token;
     }

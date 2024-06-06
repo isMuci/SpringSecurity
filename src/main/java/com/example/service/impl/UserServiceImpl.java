@@ -1,12 +1,8 @@
 package com.example.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.entity.Permission;
 import com.example.entity.User;
-import com.example.mapper.PermissionMapper;
 import com.example.mapper.UserMapper;
-import com.example.service.UserDetailService;
 import com.example.service.UserService;
 import com.example.utils.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,14 +11,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -40,17 +32,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             authenticate = authenticationManager.authenticate(authentication);
         }
         catch (AuthenticationException e) {
-            log.error("用户名或密码错误！");
-            log.info("{}",e.getMessage());
-            System.out.println(e.getMessage());
+            log.info("login : {}",e.getMessage());
             // TODO 抛出一个业务异常
             return "用户名或密码错误！";
         }
         // 获取返回的用户
-        User umsSysUser = (User) authenticate.getPrincipal();
-        // 生成一个token，返回给前端
-        String token = JWTUtil.token(authenticate, 7L);
-        log.info("登陆后的用户==========》{}",umsSysUser);
-        return token;
+        User loginUser = (User) authenticate.getPrincipal();
+        Map<String,Object> tokenMap=new HashMap<>();
+        tokenMap.put("id",((User) authenticate.getPrincipal()).getId());
+        tokenMap.put("username",((User) authenticate.getPrincipal()).getUsername());
+        tokenMap.put("perms",((User) authenticate.getPrincipal()).getPerms().stream().toList());
+
+        log.info("loginUser : {}", tokenMap);
+        return JWTUtil.token(tokenMap, 7L);
     }
 }

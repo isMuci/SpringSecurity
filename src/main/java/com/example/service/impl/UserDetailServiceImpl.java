@@ -2,8 +2,11 @@ package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.entity.Menu;
 import com.example.entity.Permission;
+import com.example.entity.Role;
 import com.example.entity.User;
+import com.example.mapper.MenuMapper;
 import com.example.mapper.PermissionMapper;
 import com.example.mapper.UserMapper;
 import com.example.service.UserDetailService;
@@ -19,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,26 +33,22 @@ public class UserDetailServiceImpl implements UserDetailService {
     UserMapper userMapper;
 
     @Autowired
-    PermissionMapper permissionMapper;
+    MenuMapper menuMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        QueryWrapper<User> queryWrapper=new QueryWrapper<>();
-        queryWrapper.eq("username",username);
-        User user=userMapper.selectOne(queryWrapper);
-
+        User user = userMapper.selectUserByUsername(username);
+        log.info("loadUserByUsername.user : {}",user);
         if(user==null){
             throw new UsernameNotFoundException("用户名未找到");
         }
-        System.out.println("找到用户");
-        QueryWrapper<Permission> permissionQueryWrapper=new QueryWrapper<>();
-        permissionQueryWrapper.eq("user_id",user.getId());
-
-        List<Permission> permissions = permissionMapper.selectList(permissionQueryWrapper);
-
-        List<String> permissionTags = permissions.stream().map(Permission::getTag).collect(Collectors.toList());
-        user.setAuthorities(AuthorityUtils.createAuthorityList(permissionTags));
-        log.info("user = {}",user);
+        Set<Role> roles = user.getRoles();
+        log.info("loadUserByUsername.role : {}",roles);
+        Set<Long> roleIds = roles.stream().map(Role::getRoleId).collect(Collectors.toSet());
+        Set<Menu> menus = menuMapper.selectMenuByIds(roleIds);
+        log.info("loadUserByUsername.menu : {}",menus);
+        user.setPerms(menus.stream().map(Menu::getPerms).collect(Collectors.toSet()));
+        log.info("loadUserByUsername.user : {}",user);
         return user;
     }
 }

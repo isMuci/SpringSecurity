@@ -1,10 +1,9 @@
 package com.example.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.entity.User;
+import com.example.entity.Role;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface UserMapper extends BaseMapper<User> {
-    User selectUserByUsername(String username);
+public interface RoleMapper extends BaseMapper<Role> {
 }

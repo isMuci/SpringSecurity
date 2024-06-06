@@ -1,7 +1,9 @@
 package com.example.config;
 
+import com.example.filter.JWTFilter;
 import com.example.filter.LoginFilter;
 import com.example.handler.*;
+import com.example.manager.IAuthenticationManager;
 import com.example.service.UserDetailService;
 import com.example.token.IPersistentTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +32,13 @@ public class SecurityConfig {
     IPersistentTokenRepository tokenRepository;
 
     @Autowired
+    IAuthenticationManager authenticationManager;
+
+    @Autowired
     private UserDetailService userDetailService;
+
+    @Autowired
+    private JWTFilter jwtFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder){
@@ -46,30 +55,27 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(conf ->
                         conf
-                                .requestMatchers("/admin/api").hasAnyAuthority("admin")
-                                .requestMatchers("/user/api").hasAnyAuthority("admin","user")
-                                .requestMatchers("/app/api").permitAll()
-                                .requestMatchers("/kaptcha/**").permitAll()
-
-                                .requestMatchers("/login").permitAll()
-                                .requestMatchers("/login").permitAll()
-                                .requestMatchers("/register").permitAll()
+//                                .requestMatchers("/app/api").permitAll()
+//                                .requestMatchers("/kaptcha/**").permitAll()
+//
+//                                .requestMatchers("/login").permitAll()
+//                                .requestMatchers("/login").permitAll()
+//                                .requestMatchers("/register").permitAll()
                                 .anyRequest()
-                                .authenticated()
-//                                .access(new IAuthenticationManager())
+//                                .authenticated()
+                                .access(authenticationManager)
                 )
                 .exceptionHandling(e->e.accessDeniedHandler(new LoginAccessDeniedHandler()))
 //                .formLogin(conf ->
 //                        conf
 ////                                .authenticationDetailsSource(new IWebAuthenticationDetailsSource())
 //                                .loginProcessingUrl("/login"))
-//                .addFilterBefore(new JWTFilter(), UsernamePasswordAuthenticationFilter.class)
-//                .rememberMe(rm->
-//                        rm
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .rememberMe(rm->
+                        rm
 //                                .rememberMeParameter("rememberMe")
 //                                .rememberMeCookieName("rememberMe")
-//                                .tokenRepository(tokenRepository)
-//                                .key("myKey"))
+                                .tokenRepository(tokenRepository))
 //                .sessionManagement(sm->
 //                        sm
 ////                                .invalidSessionUrl()
