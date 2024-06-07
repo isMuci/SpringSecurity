@@ -10,6 +10,13 @@
         <collection property="roles" resultMap="RoleResultMap"/>
     </resultMap>
 
+    <resultMap id="UserResultMapNoRole" type="com.example.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="enabled" property="enabled"/>
+    </resultMap>
+
     <resultMap id="RoleResultMap" type="com.example.entity.Role">
         <id column="role_id" property="roleId"/>
         <result column="role_label" property="roleLabel"/>
@@ -22,6 +29,14 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
     <!--  根据用户名查询用户和角色信息  -->
+    <select id="selectUserByUsernameNoRole" resultMap="UserResultMapNoRole">
+        select
+        username,
+        password,
+        enabled
+        where username = #{username}
+    </select>
+
     <select id="selectUserByUsername" resultMap="UserResultMap">
         select
         u.id,u.username,

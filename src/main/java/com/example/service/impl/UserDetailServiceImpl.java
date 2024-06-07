@@ -37,18 +37,11 @@ public class UserDetailServiceImpl implements UserDetailService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userMapper.selectUserByUsername(username);
+        User user = userMapper.selectUserByUsernameNoRole(username);
         log.info("loadUserByUsername.user : {}",user);
         if(user==null){
             throw new UsernameNotFoundException("用户名未找到");
         }
-        Set<Role> roles = user.getRoles();
-        log.info("loadUserByUsername.role : {}",roles);
-        Set<Long> roleIds = roles.stream().map(Role::getRoleId).collect(Collectors.toSet());
-        Set<Menu> menus = menuMapper.selectMenuByIds(roleIds);
-        log.info("loadUserByUsername.menu : {}",menus);
-        user.setPerms(menus.stream().map(Menu::getPerms).collect(Collectors.toSet()));
-        log.info("loadUserByUsername.user : {}",user);
         return user;
     }
 }

@@ -4,8 +4,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.entity.TokenRepo;
 import com.example.entity.User;
 
-public interface UserService extends IService<User> {
-    TokenRepo login(User user);
-
-    TokenRepo register(User user);
+public interface TokenRepoService extends IService<TokenRepo> {
 }

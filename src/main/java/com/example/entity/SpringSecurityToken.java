@@ -16,7 +16,7 @@ public class SpringSecurityToken {
     @TableField(value = "series")
     private String series;
 
-    @TableField(value = "token")
+    @TableField(value = "accessToken")
     private String tokenValue;
 
     @TableField(value = "last_used")

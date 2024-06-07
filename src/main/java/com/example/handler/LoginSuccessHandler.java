@@ -16,11 +16,11 @@ import java.util.HashMap;
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-//        String token = JWTUtil.token(authentication, 7L);
+//        String accessToken = JWTUtil.accessToken(authentication, 7L);
 
         response.setContentType("application/json;charset=UTF-8");
         HashMap<String, Object> tokenInfo = new HashMap<>();
-//        tokenInfo.put("token",token);
+//        tokenInfo.put("accessToken",accessToken);
         response.getWriter().write(JSON.toJSONString(tokenInfo));
     }
 }

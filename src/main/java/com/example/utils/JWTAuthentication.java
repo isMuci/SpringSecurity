@@ -1,5 +1,7 @@
 package com.example.utils;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,13 +1,19 @@
 package com.example.config;
 
+import cn.hutool.json.JSONObject;
 import com.example.filter.JWTFilter;
+import com.example.handler.CustomAuthenticationEntryPoint;
 import com.example.handler.LoginAccessDeniedHandler;
 import com.example.manager.IAuthenticationManager;
 import com.example.service.UserDetailService;
 import com.example.token.IPersistentTokenRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,6 +21,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -24,8 +31,13 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +48,12 @@ public class SecurityConfig {
 
     @Autowired
     IAuthenticationManager authenticationManager;
+
+    @Autowired
+    LoginAccessDeniedHandler loginAccessDeniedHandler;
+
+    @Autowired
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Autowired
     private UserDetailService userDetailService;
@@ -56,6 +74,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .exceptionHandling(e->e.authenticationEntryPoint(customAuthenticationEntryPoint).accessDeniedHandler(loginAccessDeniedHandler))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(conf ->
                         conf
                                 .requestMatchers("/login").permitAll()
@@ -64,18 +86,17 @@ public class SecurityConfig {
                                 .anyRequest()
 //                                .authenticated()
                                 .access(authenticationManager)
+
                 )
-                .exceptionHandling(e->e.accessDeniedHandler(new LoginAccessDeniedHandler()))
 //                .formLogin(conf ->
 //                        conf
 ////                                .authenticationDetailsSource(new IWebAuthenticationDetailsSource())
 //                                .loginProcessingUrl("/login"))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .rememberMe(rm->
-                        rm
-//                                .rememberMeParameter("rememberMe")
-//                                .rememberMeCookieName("rememberMe")
-                                .tokenRepository(tokenRepository))
+//                .rememberMe(rm->
+//                        rm
+////                                .rememberMeParameter("rememberMe")
+////                                .rememberMeCookieName("rememberMe")
+//                                .tokenRepository(tokenRepository))
 //                .sessionManagement(sm->
 //                        sm
 ////                                .invalidSessionUrl()
@@ -91,8 +112,7 @@ public class SecurityConfig {
 ////                                .logoutSuccessUrl()
 //                                .logoutSuccessHandler(new ILogoutSuccessHandler()))
                 .oauth2Login(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+
                 .build();
     }
 

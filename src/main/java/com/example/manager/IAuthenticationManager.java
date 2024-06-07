@@ -13,6 +13,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
@@ -24,6 +26,7 @@ public class IAuthenticationManager implements AuthorizationManager<RequestAutho
     @Autowired
     private MenuMapper menuMapper;
 
+    //TODO MUCI 2024/6/7: 异常捕获到后，会被重定向到error，或许需要全局错误处理
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext requestAuthorizationContext) {
         HttpServletRequest request = requestAuthorizationContext.getRequest();
@@ -43,6 +46,9 @@ public class IAuthenticationManager implements AuthorizationManager<RequestAutho
             return new AuthorizationDecision(true);
         }
         Collection<? extends GrantedAuthority> authorities = authentication.get().getAuthorities();
+        if(authorities==null){
+            return new AuthorizationDecision(false);
+        }
         List<String> userPerms = authorities.stream().map(GrantedAuthority::getAuthority).toList();
         log.info("check.userPerms : {}",userPerms);
         if(userPerms.contains(menuPerm)){

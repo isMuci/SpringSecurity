@@ -5,6 +5,8 @@ server:
       timeout: 10080
 
 spring:
+  mvc:
+#    throw-exception-if-no-handler-found: true
   application:
     name: spring-security
   datasource:

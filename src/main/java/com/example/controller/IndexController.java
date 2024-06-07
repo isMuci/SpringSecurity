@@ -20,10 +20,16 @@ public class IndexController {
     SessionRegistry sessionRegistry;
 
     @ResponseBody
-    @GetMapping("/index")
+    @GetMapping("/")
     public String index(){
         System.out.println("index");
         return "index";
+    }
+    @ResponseBody
+    @GetMapping("/index")
+    public String index1(){
+        System.out.println("index1");
+        return "index1";
     }
 
     @ResponseBody
@@ -64,6 +70,13 @@ public class IndexController {
     public String noAuth(){
         return "noAuth";
     }
+
+//    @ResponseBody
+//    @GetMapping("/error")
+//    public String error(){
+////        System.out.println("error");
+//        return "error";
+//    }
 
 
 }

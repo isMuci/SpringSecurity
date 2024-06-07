@@ -1,7 +1,11 @@
 package com.example.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.entity.TokenRepo;
 import com.example.entity.User;
+import com.example.mapper.TokenRepoMapper;
 import com.example.mapper.UserMapper;
 import com.example.service.UserService;
 import com.example.utils.JWTUtil;
@@ -23,27 +27,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private  AuthenticationManager authenticationManager;
 
+    @Autowired
+    private TokenRepoMapper tokenRepoMapper;
 
+
+    //TODO MUCI 2024/6/7: 将token持久化存储
     @Override
-    public String login(User user) {
+    public TokenRepo login(User user) {
         UsernamePasswordAuthenticationToken authentication =new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
         Authentication authenticate  = null;
         try{
             authenticate = authenticationManager.authenticate(authentication);
         }
         catch (AuthenticationException e) {
-            log.info("login : {}",e.getMessage());
+            log.info("login.AuthenticationException : {}",e.getMessage());
             // TODO 抛出一个业务异常
-            return "用户名或密码错误！";
+            return null;
         }
         // 获取返回的用户
         User loginUser = (User) authenticate.getPrincipal();
         Map<String,Object> tokenMap=new HashMap<>();
         tokenMap.put("id",((User) authenticate.getPrincipal()).getId());
         tokenMap.put("username",((User) authenticate.getPrincipal()).getUsername());
-        tokenMap.put("perms",((User) authenticate.getPrincipal()).getPerms().stream().toList());
+
+        String accessToken = JWTUtil.accessToken(tokenMap, 7L);
+        String refreshToken = JWTUtil.refreshToken(tokenMap, 30L);
 
         log.info("loginUser : {}", tokenMap);
-        return JWTUtil.token(tokenMap, 7L);
+
+        TokenRepo token=new TokenRepo(user.getUsername(),accessToken,refreshToken);
+        tokenRepoMapper.update(new LambdaUpdateWrapper<TokenRepo>().set(TokenRepo::getAccessToken,accessToken).set(TokenRepo::getRefreshToken,refreshToken).eq(TokenRepo::getUsername,user.getUsername()));
+        return token;
+    }
+
+    @Override
+    public TokenRepo register(User user) {
+        UsernamePasswordAuthenticationToken authentication =new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        Authentication authenticate  = null;
+        try{
+            authenticate = authenticationManager.authenticate(authentication);
+        }
+        catch (AuthenticationException e) {
+            log.info("login.AuthenticationException : {}",e.getMessage());
+            // TODO 抛出一个业务异常
+            return null;
+        }
+        // 获取返回的用户
+        User loginUser = (User) authenticate.getPrincipal();
+        Map<String,Object> tokenMap=new HashMap<>();
+        tokenMap.put("id",((User) authenticate.getPrincipal()).getId());
+        tokenMap.put("username",((User) authenticate.getPrincipal()).getUsername());
+
+        String accessToken = JWTUtil.accessToken(tokenMap, 7L);
+        String refreshToken = JWTUtil.refreshToken(tokenMap, 30L);
+
+        log.info("loginUser : {}", tokenMap);
+
+        TokenRepo token=new TokenRepo(user.getUsername(),accessToken,refreshToken);
+        tokenRepoMapper.insert(token);
+        return token;
     }
 }
