@@ -30,10 +30,11 @@
     </resultMap>
     <!--  根据用户名查询用户和角色信息  -->
     <select id="selectUserByUsernameNoRole" resultMap="UserResultMapNoRole">
-        select
+        select id,
         username,
         password,
         enabled
+        from users
         where username = #{username}
     </select>
 

@@ -32,7 +32,7 @@ public class IAuthenticationManager implements AuthorizationManager<RequestAutho
         HttpServletRequest request = requestAuthorizationContext.getRequest();
         String requestURI = request.getRequestURI();
         log.info("check.requestURI : {}",requestURI);
-        if("/login".equals(requestURI)||"/register".equals(requestURI)){
+        if ("/login".equals(requestURI) || "/register".equals(requestURI) || "/refresh".equals(requestURI)) {
             return new AuthorizationDecision(true);
         }
         Menu menu = menuMapper.selectOne(new LambdaQueryWrapper<Menu>().eq(Menu::getPath, requestURI));

@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -53,16 +54,11 @@ public class LoginController {
         return token;
     }
 
-    @RequestMapping(value = "/accessDenied", method = RequestMethod.GET)
-    public ModelAndView accessDenied(HttpServletRequest request) {
-        ModelAndView modelAndView = new ModelAndView();
-        AccessDeniedException exception = (AccessDeniedException) request.getAttribute(WebAttributes.ACCESS_DENIED_403);
-        modelAndView.getModelMap().addAttribute("errorDetails", exception.getMessage());
-        StringWriter stringWriter = new StringWriter();
-        exception.printStackTrace(new PrintWriter(stringWriter));
-        modelAndView.getModelMap().addAttribute("errorTrace", stringWriter.toString());
-        modelAndView.setViewName("accessDenied");
-        log.info("accessDenied.modelAndView : {}",modelAndView);
-        return modelAndView;
+    @PostMapping("/refresh")
+    @ResponseBody
+    public String refresh(@RequestBody Map refresh) {
+        System.out.println(refresh);
+        String token = userService.refresh(refresh.get("refresh").toString());
+        return token;
     }
 }

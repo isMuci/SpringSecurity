@@ -17,17 +17,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,14 +58,13 @@ public class JWTFilter extends OncePerRequestFilter {
                 }else{
 
                     try{
-                        Map<String, Claim> claims;
-                        claims = JWTUtil.accessTokenVerify(token);
+                        Map<String, Claim> claims = JWTUtil.accessTokenVerify(token);
                         String username=claims.get("username").asString();
                         User user = userMapper.selectUserByUsername(username);
                         log.info("loadUserByUsername.user : {}",user);
                         if(user!=null){
-                            TokenRepo tokenRepo = tokenRepoMapper.selectOne(new LambdaQueryWrapper<TokenRepo>().eq(TokenRepo::getUsername, username));
-                            if(tokenRepo.getAccessToken().equals(token)){
+                            List<String> tokenRepo = tokenRepoMapper.selectList(new LambdaQueryWrapper<TokenRepo>().eq(TokenRepo::getUsername, username)).stream().map(TokenRepo::getAccessToken).toList();
+                            if (tokenRepo.contains(token)) {
                                 Set<Role> roles = user.getRoles();
                                 log.info("loadUserByUsername.role : {}",roles);
                                 Set<Long> roleIds = roles.stream().map(Role::getRoleId).collect(Collectors.toSet());
