@@ -8,4 +8,6 @@ public interface UserService extends IService<User> {
     TokenRepo login(User user);
 
     TokenRepo register(User user);
+
+    String refresh(String refresh);
 }

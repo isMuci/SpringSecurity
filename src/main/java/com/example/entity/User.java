@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,9 +32,11 @@ public class User implements UserDetails {
     @TableField("enabled")
     private boolean enabled;
 
+    @TableField(exist = false)
     private Set<Role> roles;
 
     //懒得改了，实际要使用list进行存储数据以便接受token解析出的权限
+    @TableField(exist = false)
     private Set<String> perms;
 
     public User(String username, String password) {
